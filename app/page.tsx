@@ -110,13 +110,15 @@ export default function Home() {
         <span ref={skincareRef}>skincare</span>
       </h1>
 
-      <Image
-        src="/Skinstric developed an A.I. that creates a highly-personalised routine tailored to what your skin needs..svg"
-        alt="Skinstric developed an A.I. that creates a highly-personalised routine tailored to what your skin needs."
-        width={316}
-        height={72}
-        className="pointer-events-none absolute bottom-8 left-8 z-10 rotate-0 opacity-100"
-      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-8 z-10 mx-auto w-full max-w-6xl">
+        <Image
+          src="/Skinstric developed an A.I. that creates a highly-personalised routine tailored to what your skin needs..svg"
+          alt="Skinstric developed an A.I. that creates a highly-personalised routine tailored to what your skin needs."
+          width={316}
+          height={72}
+          className="rotate-0 opacity-100"
+        />
+      </div>
     </main>
   );
 }
