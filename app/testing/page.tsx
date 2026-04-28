@@ -24,11 +24,12 @@ export default function TestingPage() {
   const router = useRouter();
   const rhombusesObjectRef = useRef<HTMLObjectElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const proceedButtonRef = useRef<HTMLButtonElement>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState("");
+  const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
   const [formData, setFormData] = useState<PhaseOneData>({ name: "", location: "" });
 
   const questions = [
@@ -54,7 +55,6 @@ export default function TestingPage() {
     }
 
     setErrorMessage("");
-    setSubmitMessage("");
 
     const nextData = {
       ...formData,
@@ -88,7 +88,8 @@ export default function TestingPage() {
         throw new Error(payload?.message || "Failed to submit customer data.");
       }
 
-      setSubmitMessage(payload?.SUCCUSS || payload?.SUCCESS || "Submitted successfully.");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setIsSubmitSuccess(true);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to submit customer data.";
       setErrorMessage(message);
@@ -130,6 +131,27 @@ export default function TestingPage() {
     inputRef.current?.focus();
   }, [stepIndex]);
 
+  useEffect(() => {
+    if (!isSubmitSuccess || !proceedButtonRef.current) return;
+
+    const tween = gsap.fromTo(
+      proceedButtonRef.current,
+      { autoAlpha: 0, y: 22, scale: 0.92 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.7,
+        ease: "power3.out",
+        clearProps: "opacity,visibility,transform",
+      }
+    );
+
+    return () => {
+      tween.kill();
+    };
+  }, [isSubmitSuccess]);
+
   return (
     <main className="relative h-screen overflow-hidden bg-white px-6 py-5 md:px-10">
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between">
@@ -159,36 +181,53 @@ export default function TestingPage() {
         />
       </div>
 
-      <form
-        onSubmit={handleIntroSubmit}
-        className="absolute inset-0 z-20 flex flex-col items-center justify-center"
-      >
-        <p className="mb-4 text-center text-sm tracking-wide text-[#1A1B1C]">CLICK TO TYPE</p>
-        {errorMessage ? (
-          <p className="mb-3 text-center text-xs font-medium tracking-wide text-[#B42318]">{errorMessage}</p>
-        ) : null}
-        <div className="flex items-end gap-4">
-          <input
-            ref={inputRef}
-            type="text"
-            name={currentQuestion.key}
-            placeholder={currentQuestion.placeholder}
-            autoFocus
-            value={answer}
-            onChange={(event) => {
-              setAnswer(event.target.value);
-              if (errorMessage) setErrorMessage("");
-            }}
-            className="w-[18ch] max-w-[90vw] border-b border-black bg-transparent px-0 pb-2 text-center text-5xl leading-tight text-black outline-none placeholder:text-[#8C9198]"
-          />
-          <button type="submit" className="sr-only" disabled={isSubmitting}>
-            Submit
-          </button>
-        </div>
-        {submitMessage ? (
-          <p className="mt-3 text-center text-xs font-medium tracking-wide text-[#1A1B1C]">{submitMessage}</p>
-        ) : null}
-      </form>
+      {!isSubmitSuccess && !isSubmitting ? (
+        <form
+          onSubmit={handleIntroSubmit}
+          className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center"
+        >
+          <p className="mb-4 text-center text-sm tracking-wide text-[#1A1B1C]">CLICK TO TYPE</p>
+          {errorMessage ? (
+            <p className="mb-3 text-center text-xs font-medium tracking-wide text-[#B42318]">{errorMessage}</p>
+          ) : null}
+          <div className="flex items-end gap-4">
+            <input
+              ref={inputRef}
+              type="text"
+              name={currentQuestion.key}
+              placeholder={currentQuestion.placeholder}
+              autoFocus
+              value={answer}
+              onChange={(event) => {
+                setAnswer(event.target.value);
+                if (errorMessage) setErrorMessage("");
+              }}
+              className="pointer-events-auto w-[18ch] max-w-[90vw] border-b border-black bg-transparent px-0 pb-2 text-center text-5xl leading-tight text-black outline-none placeholder:text-[#8C9198]"
+            />
+            <button type="submit" className="sr-only" disabled={isSubmitting}>
+              Submit
+            </button>
+          </div>
+        </form>
+      ) : null}
+
+      {isSubmitting ? (
+        <section className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center text-center">
+          <h2 className="text-3xl font-semibold tracking-wide text-[#1A1B1C]">Processing Submission</h2>
+          <div className="mt-4 flex items-center justify-center gap-2" aria-label="Loading">
+            <span className="h-2 w-2 animate-bounce rounded-full bg-black [animation-delay:-0.3s]" />
+            <span className="h-2 w-2 animate-bounce rounded-full bg-black [animation-delay:-0.15s]" />
+            <span className="h-2 w-2 animate-bounce rounded-full bg-black" />
+          </div>
+        </section>
+      ) : null}
+
+      {isSubmitSuccess ? (
+        <section className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center text-center">
+          <h2 className="text-4xl font-semibold tracking-wide text-[#1A1B1C]">Thank You!</h2>
+          <p className="mt-2 text-base tracking-wide text-[#1A1B1C]">Proceed to the next step.</p>
+        </section>
+      ) : null}
 
       <div className="pointer-events-none absolute top-1/2 left-1/2 h-[min(762px,90vmin)] w-[min(762px,90vmin)] -translate-x-1/2 -translate-y-1/2 opacity-100">
         <object
@@ -200,11 +239,34 @@ export default function TestingPage() {
         />
       </div>
 
-      <div className="absolute inset-x-0 bottom-8 z-30 mx-auto w-full max-w-6xl">
+      {isSubmitSuccess ? (
+        <div className="absolute inset-x-0 bottom-8 z-30 mx-auto w-full max-w-6xl">
+          <div className="flex justify-end pr-4">
+            <button
+              ref={proceedButtonRef}
+              type="button"
+              onClick={() => router.push("/result")}
+              className="cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
+              aria-label="Proceed to the next step"
+            >
+              <Image
+                src="/proceed-button-icon-text.svg"
+                alt="Proceed to the next step"
+                width={220}
+                height={42}
+                className="h-auto w-auto"
+                priority
+              />
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-8 z-30 mx-auto w-full max-w-6xl">
         <button
           type="button"
           onClick={() => router.back()}
-          className="cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
+          className="pointer-events-auto cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
           aria-label="Go back"
         >
           <Image
