@@ -265,7 +265,7 @@ export default function TestingPage() {
       <div className="pointer-events-none absolute inset-x-0 bottom-8 z-30 mx-auto w-full max-w-6xl">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => router.replace("/")}
           className="pointer-events-auto cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
           aria-label="Go back"
         >
