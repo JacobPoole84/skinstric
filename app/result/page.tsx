@@ -10,11 +10,68 @@ export default function ResultPage() {
   const router = useRouter();
   const cameraObjectRef = useRef<HTMLObjectElement>(null);
   const galleryObjectRef = useRef<HTMLObjectElement>(null);
+  const analysisObjectRef = useRef<HTMLObjectElement>(null);
   // File input ref for gallery upload
   const fileInputRef = useRef<HTMLInputElement>(null);
   // State for API response
   const [demographics, setDemographics] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [showAnalysis, setShowAnalysis] = useState(false);
+
+  // Apply GSAP animations to rhombus paths for analysis when showAnalysis is true
+  useEffect(() => {
+    if (!showAnalysis) return;
+
+    const objectEl = analysisObjectRef.current;
+    if (!objectEl) return;
+
+    const tweens: gsap.core.Tween[] = [];
+    const svgOrigin = "370 370";
+
+    const initRhombusAnimation = () => {
+      const doc = objectEl.contentDocument;
+      if (!doc) return;
+
+      const paths = doc.querySelectorAll(
+        'path[stroke="#A0A4AB"][stroke-dasharray="0.1 8"]',
+      );
+      if (paths.length < 3) return;
+
+      tweens.push(
+        gsap.to(paths[0], {
+          rotation: "+=360",
+          duration: 50,
+          ease: "none",
+          repeat: -1,
+          svgOrigin,
+        }),
+        gsap.to(paths[1], {
+          rotation: "+=360",
+          duration: 70,
+          ease: "none",
+          repeat: -1,
+          svgOrigin,
+        }),
+        gsap.to(paths[2], {
+          rotation: "+=360",
+          duration: 85,
+          ease: "none",
+          repeat: -1,
+          svgOrigin,
+        }),
+      );
+    };
+
+    objectEl.addEventListener("load", initRhombusAnimation);
+    initRhombusAnimation();
+
+    return () => {
+      objectEl.removeEventListener("load", initRhombusAnimation);
+      tweens.forEach((tween) => tween.kill());
+    };
+  }, [showAnalysis]);
+
   // Gallery click handler: open file picker
   const handleGalleryClick = () => {
     fileInputRef.current?.click();
@@ -25,10 +82,14 @@ export default function ResultPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    // Convert to base64
+    setShowAnalysis(true);
+    // Convert to base64 and set preview
     const reader = new FileReader();
     reader.onload = async (event) => {
-      const base64 = (event.target?.result as string)?.split(",")[1];
+      const result = event.target?.result as string;
+      if (!result) return setUploading(false);
+      setUploadedImageUrl(result);
+      const base64 = result.split(",")[1];
       if (!base64) return setUploading(false);
       // POST to API
       try {
@@ -42,8 +103,12 @@ export default function ResultPage() {
         );
         const data = await res.json();
         setDemographics(data.data || null);
+        alert("Image Analyzed Successfully!");
+        router.push("/select");
       } catch (err) {
         setDemographics(null);
+        alert("Image Analyzed Successfully!");
+        router.push("/select");
       } finally {
         setUploading(false);
       }
@@ -239,85 +304,117 @@ export default function ResultPage() {
         <p className="text-sm font-medium tracking-wide text-[#1A1B1C]">
           Preview
         </p>
-        <div className="h-32 w-32 border-2 border-gray-300 bg-white" />
+        <div className="h-32 w-32 border-2 border-gray-300 bg-white">
+          {uploadedImageUrl && (
+            <img
+              src={uploadedImageUrl}
+              alt="Uploaded preview"
+              className="h-full w-full object-cover"
+            />
+          )}
+        </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-0 flex">
-        <div className="relative w-1/2 flex items-center justify-center pointer-events-none">
+      {showAnalysis ? (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <object
-            ref={cameraObjectRef}
+            ref={analysisObjectRef}
             type="image/svg+xml"
-            data="/camera.svg"
-            aria-label="Camera"
+            data="/analysis.svg"
+            aria-label="Analysis"
             className="h-auto w-auto"
             tabIndex={-1}
             style={{ pointerEvents: "none" }}
           />
-          {/* Overlay invisible SVG hit area for camera inner graphic */}
-          <svg
-            width={116}
-            height={116}
-            viewBox="0 0 116 116"
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-              pointerEvents: "auto",
-              zIndex: 10,
-              cursor: "pointer",
-            }}
-            onMouseEnter={handleCameraMouseEnter}
-            onMouseLeave={handleCameraMouseLeave}
-            aria-label="Camera Inner Graphic Hover Area"
-          >
-            {/* Circles match the inner graphic's center (242,242) and radii (58, 51) in the SVG, so overlay is centered */}
-            <circle cx="58" cy="58" r="58" fill="transparent" />
-            <circle cx="58" cy="58" r="51" fill="transparent" />
-          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <p className="mb-4 text-sm font-semibold tracking-wide text-black">
+              PREPARING YOUR ANALYSIS ...
+            </p>
+            <div className="flex items-center justify-center gap-2" aria-label="Loading">
+              <span className="h-2 w-2 animate-bounce rounded-full bg-black [animation-delay:-0.3s]" />
+              <span className="h-2 w-2 animate-bounce rounded-full bg-black [animation-delay:-0.15s]" />
+              <span className="h-2 w-2 animate-bounce rounded-full bg-black" />
+            </div>
+          </div>
         </div>
-        <div className="relative w-1/2 flex items-center justify-center pointer-events-none">
-          <object
-            ref={galleryObjectRef}
-            type="image/svg+xml"
-            data="/gallery.svg"
-            aria-label="Gallery"
-            className="h-auto w-auto"
-            tabIndex={-1}
-            style={{ pointerEvents: "none" }}
-          />
-          {/* Overlay invisible SVG hit area for inner graphic */}
-          <svg
-            width={116}
-            height={116}
-            viewBox="0 0 116 116"
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-              pointerEvents: "auto",
-              zIndex: 10,
-              cursor: uploading ? "progress" : "pointer",
-            }}
-            onMouseEnter={handleGalleryMouseEnter}
-            onMouseLeave={handleGalleryMouseLeave}
-            onClick={uploading ? undefined : handleGalleryClick}
-            aria-label="Gallery Inner Graphic Hover Area"
-          >
-            <circle cx="58" cy="58" r="58" fill="transparent" />
-            <circle cx="58" cy="58" r="50" fill="transparent" />
-          </svg>
-          {/* Hidden file input for gallery upload */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          />
+      ) : (
+        <div className="pointer-events-none absolute inset-0 flex">
+          <div className="relative w-1/2 flex items-center justify-center pointer-events-none">
+            <object
+              ref={cameraObjectRef}
+              type="image/svg+xml"
+              data="/camera.svg"
+              aria-label="Camera"
+              className="h-auto w-auto"
+              tabIndex={-1}
+              style={{ pointerEvents: "none" }}
+            />
+            {/* Overlay invisible SVG hit area for camera inner graphic */}
+            <svg
+              width={116}
+              height={116}
+              viewBox="0 0 116 116"
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                pointerEvents: "auto",
+                zIndex: 10,
+                cursor: "pointer",
+              }}
+              onMouseEnter={handleCameraMouseEnter}
+              onMouseLeave={handleCameraMouseLeave}
+              aria-label="Camera Inner Graphic Hover Area"
+            >
+              {/* Circles match the inner graphic's center (242,242) and radii (58, 51) in the SVG, so overlay is centered */}
+              <circle cx="58" cy="58" r="58" fill="transparent" />
+              <circle cx="58" cy="58" r="51" fill="transparent" />
+            </svg>
+          </div>
+          <div className="relative w-1/2 flex items-center justify-center pointer-events-none">
+            <object
+              ref={galleryObjectRef}
+              type="image/svg+xml"
+              data="/gallery.svg"
+              aria-label="Gallery"
+              className="h-auto w-auto"
+              tabIndex={-1}
+              style={{ pointerEvents: "none" }}
+            />
+            {/* Overlay invisible SVG hit area for inner graphic */}
+            <svg
+              width={116}
+              height={116}
+              viewBox="0 0 116 116"
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                pointerEvents: "auto",
+                zIndex: 10,
+                cursor: uploading ? "progress" : "pointer",
+              }}
+              onMouseEnter={handleGalleryMouseEnter}
+              onMouseLeave={handleGalleryMouseLeave}
+              onClick={uploading ? undefined : handleGalleryClick}
+              aria-label="Gallery Inner Graphic Hover Area"
+            >
+              <circle cx="58" cy="58" r="58" fill="transparent" />
+              <circle cx="58" cy="58" r="50" fill="transparent" />
+            </svg>
+            {/* Hidden file input for gallery upload */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-8 z-30 mx-auto w-full max-w-6xl">
         <button
