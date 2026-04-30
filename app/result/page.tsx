@@ -103,6 +103,9 @@ export default function ResultPage() {
         );
         const data = await res.json();
         setDemographics(data.data || null);
+        if (data.data) {
+          localStorage.setItem("demographics", JSON.stringify(data.data));
+        }
         alert("Image Analyzed Successfully!");
         router.push("/select");
       } catch (err) {
