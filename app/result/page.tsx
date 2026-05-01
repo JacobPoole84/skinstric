@@ -290,9 +290,9 @@ export default function ResultPage() {
   }, []);
 
   return (
-    <main className="relative h-screen overflow-hidden bg-white px-6 py-5 md:px-10">
-      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between">
-        <div className="flex items-center gap-4 text-[16px] leading-[24px] font-semibold tracking-wide text-black">
+    <main className="relative flex min-h-screen flex-col overflow-x-hidden bg-white px-4 py-4 sm:px-6 sm:py-5 md:px-10">
+      <nav className="mx-auto flex w-full max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3 text-[14px] leading-[20px] font-semibold tracking-wide text-black sm:gap-4 sm:text-[16px] sm:leading-[24px]">
           <Link href="/" className="transition-opacity hover:opacity-70">
             SKINSTRIC
           </Link>
@@ -301,51 +301,48 @@ export default function ResultPage() {
 
         <button
           type="button"
-          className="my-0 mx-4 bg-black px-4 py-2 text-[10px] font-semibold tracking-wide text-white transition-opacity hover:opacity-85"
+          className="self-start bg-black px-4 py-2 text-[10px] font-semibold tracking-wide text-white transition-opacity hover:opacity-85 sm:self-auto"
         >
           ENTER CODE
         </button>
       </nav>
 
-      <div className="mx-auto w-full max-w-6xl pt-4">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 pt-4 sm:flex-row sm:items-start sm:justify-between">
         <Image
           src="/To%20start%20analysis.svg"
           alt="To start analysis"
           width={320}
           height={80}
           priority
-          className="h-auto w-auto"
+          className="h-auto w-full max-w-[260px] sm:max-w-[320px]"
         />
-      </div>
-
-      <div className="absolute right-6 top-16 md:right-32 flex flex-col items-start gap-2">
-        <p className="text-sm font-medium tracking-wide text-[#1A1B1C]">
-          Preview
-        </p>
-        <div className="h-32 w-32 border-2 border-gray-300 bg-white">
-          {uploadedImageUrl && (
-            <img
-              src={uploadedImageUrl}
-              alt="Uploaded preview"
-              className="h-full w-full object-cover"
-            />
-          )}
+        <div className="flex flex-col items-start gap-2 sm:items-end">
+          <p className="text-sm font-medium tracking-wide text-[#1A1B1C]">Preview</p>
+          <div className="h-24 w-24 border-2 border-gray-300 bg-white sm:h-32 sm:w-32">
+            {uploadedImageUrl && (
+              <img
+                src={uploadedImageUrl}
+                alt="Uploaded preview"
+                className="h-full w-full object-cover"
+              />
+            )}
+          </div>
         </div>
       </div>
 
       {showAnalysis ? (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="relative flex flex-1 items-center justify-center px-4 py-10">
           <object
             ref={analysisObjectRef}
             type="image/svg+xml"
             data="/analysis.svg"
             aria-label="Analysis"
-            className="h-auto w-auto"
+            className="h-auto w-full max-w-[320px] sm:max-w-[420px] md:max-w-[520px]"
             tabIndex={-1}
             style={{ pointerEvents: "none" }}
           />
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <p className="mb-4 text-sm font-semibold tracking-wide text-black">
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
+            <p className="mb-4 text-center text-sm font-semibold tracking-wide text-black">
               PREPARING YOUR ANALYSIS ...
             </p>
             <div className="flex items-center justify-center gap-2" aria-label="Loading">
@@ -356,18 +353,17 @@ export default function ResultPage() {
           </div>
         </div>
       ) : (
-        <div className="pointer-events-none absolute inset-0 flex">
-          <div className="relative w-1/2 flex items-center justify-center pointer-events-none">
+        <div className="flex flex-1 flex-col items-center justify-center py-8 sm:flex-row">
+          <div className="relative flex w-full flex-1 items-center justify-center pointer-events-none">
             <object
               ref={cameraObjectRef}
               type="image/svg+xml"
               data="/camera.svg"
               aria-label="Camera"
-              className="h-auto w-auto"
+              className="h-auto w-full max-w-[260px] sm:max-w-[320px] md:max-w-[380px]"
               tabIndex={-1}
               style={{ pointerEvents: "none" }}
             />
-            {/* Overlay invisible SVG hit area for camera inner graphic */}
             <svg
               width={116}
               height={116}
@@ -386,22 +382,20 @@ export default function ResultPage() {
               onClick={handleCameraClick}
               aria-label="Camera Inner Graphic Hover Area"
             >
-              {/* Circles match the inner graphic's center (242,242) and radii (58, 51) in the SVG, so overlay is centered */}
               <circle cx="58" cy="58" r="58" fill="transparent" />
               <circle cx="58" cy="58" r="51" fill="transparent" />
             </svg>
           </div>
-          <div className="relative w-1/2 flex items-center justify-center pointer-events-none">
+          <div className="relative flex w-full flex-1 items-center justify-center pointer-events-none">
             <object
               ref={galleryObjectRef}
               type="image/svg+xml"
               data="/gallery.svg"
               aria-label="Gallery"
-              className="h-auto w-auto"
+              className="h-auto w-full max-w-[260px] sm:max-w-[320px] md:max-w-[380px]"
               tabIndex={-1}
               style={{ pointerEvents: "none" }}
             />
-            {/* Overlay invisible SVG hit area for inner graphic */}
             <svg
               width={116}
               height={116}
@@ -423,7 +417,6 @@ export default function ResultPage() {
               <circle cx="58" cy="58" r="58" fill="transparent" />
               <circle cx="58" cy="58" r="50" fill="transparent" />
             </svg>
-            {/* Hidden file input for gallery upload */}
             <input
               ref={fileInputRef}
               type="file"
@@ -435,11 +428,11 @@ export default function ResultPage() {
         </div>
       )}
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-8 z-30 mx-auto w-full max-w-6xl">
+      <div className="mx-auto w-full max-w-6xl pb-6 sm:pb-8">
         <button
           type="button"
           onClick={() => router.replace("/testing")}
-          className="pointer-events-auto cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
+          className="cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
           aria-label="Go back"
         >
           <Image
@@ -461,10 +454,10 @@ export default function ResultPage() {
           aria-labelledby="camera-modal-title"
         >
           <div
-            className="relative h-[136px] w-[368px] bg-[#1A1B1C] text-white"
+            className="relative mx-4 w-full max-w-[368px] bg-[#1A1B1C] text-white"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="pt-4 pl-4">
+            <div className="pt-4 pl-4 pr-4">
               <h2
                 id="camera-modal-title"
                 className="text-base font-semibold tracking-wide"
@@ -473,20 +466,20 @@ export default function ResultPage() {
               </h2>
             </div>
 
-            <div className="absolute inset-x-0 bottom-[35px] h-px bg-white" />
+            <div className="mt-6 h-px w-full bg-white" />
 
-            <div className="absolute bottom-0 right-0 flex h-[35px]">
+            <div className="flex justify-end">
               <button
                 type="button"
                 onClick={handleCameraDeny}
-                className="flex h-full w-[68px] cursor-pointer items-center justify-center text-xs font-semibold tracking-wider text-white/70 transition-colors hover:text-white"
+                className="flex h-[44px] w-[68px] cursor-pointer items-center justify-center text-xs font-semibold tracking-wider text-white/70 transition-colors hover:text-white"
               >
                 DENY
               </button>
               <button
                 type="button"
                 onClick={handleCameraAllow}
-                className="flex h-full w-[80px] cursor-pointer items-center justify-center text-xs font-semibold tracking-wider text-white transition-opacity hover:opacity-85"
+                className="flex h-[44px] w-[80px] cursor-pointer items-center justify-center text-xs font-semibold tracking-wider text-white transition-opacity hover:opacity-85"
               >
                 ALLOW
               </button>

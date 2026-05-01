@@ -47,14 +47,28 @@ export default function SummaryPage() {
   });
 
   useEffect(() => {
-    const raw =
-      typeof window !== "undefined"
-        ? localStorage.getItem("demographics")
-        : null;
+    if (typeof window === "undefined") return;
+    const raw = localStorage.getItem("demographics");
     if (!raw) return;
     try {
       const parsed = JSON.parse(raw) as Demographics;
       setDemographics(parsed);
+
+      const savedRaw = localStorage.getItem("selectedDemographics");
+      if (savedRaw) {
+        try {
+          const saved = JSON.parse(savedRaw) as Record<Category, string>;
+          setSelected({
+            race: saved.race || topKey(parsed.race),
+            age: saved.age || topKey(parsed.age),
+            sex: saved.sex || topKey(parsed.gender),
+          });
+          return;
+        } catch {
+          /* fall through to defaults */
+        }
+      }
+
       setSelected({
         race: topKey(parsed.race),
         age: topKey(parsed.age),
@@ -77,10 +91,17 @@ export default function SummaryPage() {
   const activeKey = selected[category] || activeEntries[0]?.[0] || "";
   const activeValue = getMap(category)[activeKey] ?? 0;
 
+  const handleConfirm = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("selectedDemographics", JSON.stringify(selected));
+    }
+    router.push("/select");
+  };
+
   return (
-    <main className="relative h-screen overflow-hidden bg-white px-6 py-5 md:px-10">
-      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between">
-        <div className="flex items-center gap-4 text-[16px] leading-[24px] font-semibold tracking-wide text-black">
+    <main className="relative flex min-h-screen flex-col lg:overflow-hidden lg:h-screen bg-white px-4 py-4 sm:px-6 sm:py-5 md:px-10">
+      <nav className="mx-auto flex w-full max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3 text-[14px] leading-[20px] font-semibold tracking-wide text-black sm:gap-4 sm:text-[16px] sm:leading-[24px]">
           <Link href="/" className="transition-opacity hover:opacity-70">
             SKINSTRIC
           </Link>
@@ -89,7 +110,7 @@ export default function SummaryPage() {
 
         <button
           type="button"
-          className="my-0 mx-4 bg-black px-4 py-2 text-[10px] font-semibold tracking-wide text-white transition-opacity hover:opacity-85"
+          className="self-start bg-black px-4 py-2 text-[10px] font-semibold tracking-wide text-white transition-opacity hover:opacity-85 sm:self-auto"
         >
           ENTER CODE
         </button>
@@ -99,8 +120,8 @@ export default function SummaryPage() {
         <p className="text-sm font-bold tracking-wide text-black">
           A.I. ANALYSIS
         </p>
-        <div className="mt-1 flex items-center gap-4">
-          <h1 className="text-4xl font-semibold tracking-wide text-black md:text-5xl">
+        <div className="mt-1 flex flex-wrap items-center gap-3 sm:gap-4">
+          <h1 className="text-3xl font-semibold tracking-wide text-black sm:text-4xl md:text-5xl">
             DEMOGRAPHICS
           </h1>
           <Image
@@ -108,7 +129,7 @@ export default function SummaryPage() {
             alt="Nav buttons"
             width={120}
             height={32}
-            className="h-auto w-auto"
+            className="h-auto w-[100px] sm:w-[120px]"
           />
         </div>
         <p className="mt-1 text-sm tracking-wide text-gray-500">
@@ -116,8 +137,8 @@ export default function SummaryPage() {
         </p>
       </div>
 
-      <div className="mx-auto mt-6 flex w-full max-w-6xl items-stretch justify-between gap-2">
-        <div className="flex flex-col gap-2">
+      <div className="mx-auto mt-6 flex w-full max-w-6xl flex-col gap-3 lg:flex-row lg:items-stretch lg:justify-between lg:gap-2">
+        <div className="grid grid-cols-3 gap-2 lg:flex lg:flex-col">
           {CATEGORIES.map((cat) => {
             const isActive = category === cat;
             const value = selected[cat] || topKey(getMap(cat));
@@ -126,7 +147,7 @@ export default function SummaryPage() {
                 key={cat}
                 type="button"
                 onClick={() => setCategory(cat)}
-                className={`relative flex h-[104px] w-[208px] flex-col justify-between p-4 text-left transition ${
+                className={`relative flex h-[104px] w-full flex-col justify-between p-3 text-left transition lg:w-[208px] lg:p-4 ${
                   isActive
                     ? "bg-[#1A1B1C] text-white"
                     : "bg-[#F3F3F4] text-black hover:bg-[#E1E1E2]"
@@ -147,12 +168,12 @@ export default function SummaryPage() {
           })}
         </div>
 
-        <div className="relative flex min-w-0 flex-1 flex-col bg-[#F3F3F4] p-6">
+        <div className="relative flex min-w-0 flex-1 flex-col bg-[#F3F3F4] p-4 sm:p-6">
           <p className="text-sm tracking-wide text-black">
             {activeKey ? titleCase(activeKey) : ""}
           </p>
-          <div className="flex flex-1 items-center justify-center">
-            <div className="relative flex h-72 w-72 items-center justify-center">
+          <div className="flex flex-1 items-center justify-center py-6">
+            <div className="relative flex h-[200px] w-[200px] items-center justify-center sm:h-64 sm:w-64 lg:h-72 lg:w-72">
               <svg
                 className="absolute inset-0 h-full w-full -rotate-90"
                 viewBox="0 0 100 100"
@@ -181,7 +202,7 @@ export default function SummaryPage() {
                   className="transition-[stroke-dashoffset] duration-500 ease-out"
                 />
               </svg>
-              <span className="relative text-3xl font-light tracking-wide">
+              <span className="relative text-2xl font-light tracking-wide sm:text-3xl">
                 {Math.round(activeValue * 100)}
                 <sup className="text-base">%</sup>
               </span>
@@ -189,7 +210,7 @@ export default function SummaryPage() {
           </div>
         </div>
 
-        <div className="flex w-[448px] flex-col bg-[#F3F3F4]">
+        <div className="flex w-full flex-col bg-[#F3F3F4] lg:w-[448px]">
           <div className="flex items-center justify-between bg-[#1A1B1C] px-4 py-3 text-xs tracking-wider text-white">
             <span>{CATEGORY_LABEL[category]}</span>
             <span>A. I. CONFIDENCE</span>
@@ -233,11 +254,15 @@ export default function SummaryPage() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-8 z-30 mx-auto w-full max-w-6xl">
+      <p className="mt-4 text-center text-sm tracking-wide text-gray-400 sm:text-[16px]">
+        If A.I. estimate is wrong, select the correct one.
+      </p>
+
+      <div className="mx-auto mt-auto flex w-full max-w-6xl items-center justify-between pb-6 pt-4 sm:pb-8">
         <button
           type="button"
           onClick={() => router.push("/select")}
-          className="pointer-events-auto cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
+          className="cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
           aria-label="Go back"
         >
           <Image
@@ -248,18 +273,11 @@ export default function SummaryPage() {
             className="h-auto w-auto"
           />
         </button>
-      </div>
-
-      <p className="pointer-events-none absolute inset-x-0 bottom-8 z-20 text-center text-[16px] tracking-wide text-gray-400">
-        If A.I. estimate is wrong, select the correct one.
-      </p>
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-8 z-30 mx-auto w-full max-w-6xl">
-        <div className="flex justify-end gap-4 pr-4">
+        <div className="flex gap-3 sm:gap-4">
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="pointer-events-auto cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
+            className="cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
             aria-label="Reset"
           >
             <Image
@@ -272,8 +290,8 @@ export default function SummaryPage() {
           </button>
           <button
             type="button"
-            onClick={() => router.push("/select")}
-            className="pointer-events-auto cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
+            onClick={handleConfirm}
+            className="cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
             aria-label="Confirm"
           >
             <Image

@@ -44,8 +44,11 @@ export default function Home() {
   };
 
   return (
-    <main className="relative h-screen overflow-hidden bg-white px-6 py-5 md:px-10">
-      <div ref={leftContainerRef} className="absolute top-1/2 left-0 h-[604px] w-[302px] -translate-y-1/2">
+    <main className="relative flex min-h-screen flex-col overflow-x-hidden bg-white px-4 py-4 sm:px-6 sm:py-5 md:px-10">
+      <div
+        ref={leftContainerRef}
+        className="absolute top-1/2 left-0 hidden h-[604px] w-[302px] -translate-y-1/2 lg:block"
+      >
         <Image
           src="/Rectangle 2779.svg"
           alt=""
@@ -63,7 +66,10 @@ export default function Home() {
         />
       </div>
 
-      <div ref={rightContainerRef} className="absolute top-1/2 right-0 h-[604px] w-[302px] -translate-y-1/2">
+      <div
+        ref={rightContainerRef}
+        className="absolute top-1/2 right-0 hidden h-[604px] w-[302px] -translate-y-1/2 lg:block"
+      >
         <Image
           src="/Rectangle 2778.svg"
           alt=""
@@ -86,8 +92,8 @@ export default function Home() {
         </Link>
       </div>
 
-      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between">
-        <div className="flex items-center gap-4 text-[14px] font-semibold tracking-wide text-black">
+      <nav className="mx-auto flex w-full max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3 text-[13px] font-semibold tracking-wide text-black sm:gap-4 sm:text-[14px]">
           <Link href="/" className="transition-opacity hover:opacity-70">
             SKINSTRIC
           </Link>
@@ -96,7 +102,7 @@ export default function Home() {
 
         <button
           type="button"
-          className="my-0 mx-4 bg-black px-4 py-2 text-[10px] font-semibold tracking-wide text-white transition-opacity hover:opacity-85"
+          className="self-start bg-black px-4 py-2 text-[10px] font-semibold tracking-wide text-white transition-opacity hover:opacity-85 sm:self-auto"
         >
           ENTER CODE
         </button>
@@ -104,13 +110,44 @@ export default function Home() {
 
       <h1
         ref={headingRef}
-        className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center text-[100px] font-light leading-[100px] text-black"
+        className="pointer-events-none absolute inset-0 hidden flex-col items-center justify-center text-center text-[100px] font-light leading-[100px] text-black lg:flex"
       >
         <span>Sophisticated</span>
         <span ref={skincareRef}>skincare</span>
       </h1>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-8 z-10 mx-auto w-full max-w-6xl">
+      <section className="flex flex-1 flex-col justify-center py-10 lg:hidden">
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center text-center">
+          <h1 className="text-[clamp(3rem,11vw,5.5rem)] font-light leading-[0.95] text-black">
+            <span className="block">Sophisticated</span>
+            <span className="block">skincare</span>
+          </h1>
+
+          <div className="mt-10 flex w-full justify-center">
+            <Link href="/testing" className="self-center">
+              <Image
+                src="/button-icon-text-shrunk (1).svg"
+                alt="Take Test Now"
+                width={150}
+                height={44}
+                className="h-auto w-full max-w-[210px] cursor-pointer transition-transform duration-200 ease-out hover:scale-105"
+              />
+            </Link>
+          </div>
+
+          <div className="mt-10 w-full max-w-[316px]">
+            <Image
+              src="/Skinstric developed an A.I. that creates a highly-personalised routine tailored to what your skin needs..svg"
+              alt="Skinstric developed an A.I. that creates a highly-personalised routine tailored to what your skin needs."
+              width={316}
+              height={72}
+              className="h-auto w-full"
+            />
+          </div>
+        </div>
+      </section>
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-8 z-10 mx-auto hidden w-full max-w-6xl lg:block">
         <Image
           src="/Skinstric developed an A.I. that creates a highly-personalised routine tailored to what your skin needs..svg"
           alt="Skinstric developed an A.I. that creates a highly-personalised routine tailored to what your skin needs."
