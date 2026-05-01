@@ -18,6 +18,7 @@ export default function ResultPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
 
   // Apply GSAP animations to rhombus paths for analysis when showAnalysis is true
   useEffect(() => {
@@ -75,6 +76,20 @@ export default function ResultPage() {
   // Gallery click handler: open file picker
   const handleGalleryClick = () => {
     fileInputRef.current?.click();
+  };
+
+  // Camera click handler: open the permission modal
+  const handleCameraClick = () => {
+    setShowCameraModal(true);
+  };
+
+  const handleCameraDeny = () => {
+    setShowCameraModal(false);
+  };
+
+  const handleCameraAllow = () => {
+    setShowCameraModal(false);
+    router.push("/camera");
   };
 
   // Handle file selection and upload
@@ -368,6 +383,7 @@ export default function ResultPage() {
               }}
               onMouseEnter={handleCameraMouseEnter}
               onMouseLeave={handleCameraMouseLeave}
+              onClick={handleCameraClick}
               aria-label="Camera Inner Graphic Hover Area"
             >
               {/* Circles match the inner graphic's center (242,242) and radii (58, 51) in the SVG, so overlay is centered */}
@@ -435,6 +451,49 @@ export default function ResultPage() {
           />
         </button>
       </div>
+
+      {showCameraModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={handleCameraDeny}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="camera-modal-title"
+        >
+          <div
+            className="relative h-[136px] w-[368px] bg-[#1A1B1C] text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="pt-4 pl-4">
+              <h2
+                id="camera-modal-title"
+                className="text-base font-semibold tracking-wide"
+              >
+                ALLOW A.I. TO ACCESS YOUR CAMERA?
+              </h2>
+            </div>
+
+            <div className="absolute inset-x-0 bottom-[35px] h-px bg-white" />
+
+            <div className="absolute bottom-0 right-0 flex h-[35px]">
+              <button
+                type="button"
+                onClick={handleCameraDeny}
+                className="flex h-full w-[68px] cursor-pointer items-center justify-center text-xs font-semibold tracking-wider text-white/70 transition-colors hover:text-white"
+              >
+                DENY
+              </button>
+              <button
+                type="button"
+                onClick={handleCameraAllow}
+                className="flex h-full w-[80px] cursor-pointer items-center justify-center text-xs font-semibold tracking-wider text-white transition-opacity hover:opacity-85"
+              >
+                ALLOW
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
